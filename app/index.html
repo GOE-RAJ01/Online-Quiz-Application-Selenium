@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Curiosity Quiz</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:linear-gradient(135deg,#eaf0ff,#e8f8f5);font-family:Arial,sans-serif;color:#17213b}
+.card{width:min(700px,100%);background:white;border-radius:20px;padding:32px;box-shadow:0 15px 45px #20366520}
+.tag{color:#3157c8;background:#eef2ff;border-radius:30px;padding:8px 13px;font-size:13px;font-weight:bold}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;color:#65718a}
+h1{margin:18px 0 6px;font-size:32px}.sub{color:#65718a;margin:0 0 24px;line-height:1.5}
+.track{height:8px;background:#edf1f8;border-radius:20px;overflow:hidden;margin-bottom:28px}#bar{height:100%;width:20%;background:#3157c8;transition:width .2s}
+.category{font-size:12px;font-weight:bold;letter-spacing:1px;color:#3157c8}h2{font-size:23px;line-height:1.35}
+#options{display:grid;gap:11px}.option{display:flex;gap:12px;align-items:center;border:1px solid #dce3f0;border-radius:12px;padding:14px;cursor:pointer;font-weight:600}
+.option:has(input:checked){border:2px solid #3157c8;background:#f0f3ff}.option input{accent-color:#3157c8}
+button{border:0;border-radius:10px;padding:13px 18px;background:#3157c8;color:white;font-weight:bold;cursor:pointer;margin:18px 8px 0 0}button:disabled{opacity:.45;cursor:not-allowed}#next{background:#168a77}
+#feedback{min-height:25px;font-weight:bold;line-height:1.5}.good{color:#168354}.bad{color:#c04444}.muted{color:#65718a}
+#result-panel{text-align:center;padding:20px 0}#result-panel .trophy{font-size:50px}[hidden]{display:none!important}.foot{text-align:center;color:#65718a;font-size:12px;margin-top:22px}
+</style></head><body><main class="card">
+<div class="top"><span class="tag">✦ CURIOSITY QUIZ</span><span id="progress">Question 1 of 5</span></div>
+<h1>Test your curiosity.</h1><p class="sub">Five fun questions from space, science, technology and the natural world. Choose your answer and see how you do!</p>
+<div class="track"><div id="bar"></div></div>
+<section id="quiz"><div class="category" id="category">SPACE</div><h2 id="question"></h2><div id="options"></div>
+<p id="feedback" class="muted" aria-live="polite"></p><button id="submit" type="button">Submit answer</button><button id="next" type="button" disabled>Next question →</button></section>
+<section id="result-panel" hidden><div class="trophy">🏆</div><h2 id="result-title">Quiz completed!</h2><p id="result"></p><button id="restart" type="button">↻ Try again</button></section>
+<p class="foot">Mini demonstration project for Selenium + Python testing.</p></main>
+<script>
+const questions=[
+{category:"SPACE",q:"Which planet has the most prominent ring system?",o:["Mars","Saturn","Venus","Mercury"],a:"Saturn",why:"Saturn's rings are the brightest and most spectacular in our Solar System."},
+{category:"ANIMAL KINGDOM",q:"Which animal has three hearts?",o:["Dolphin","Octopus","Penguin","Sea turtle"],a:"Octopus",why:"An octopus has three hearts: two pump blood to the gills and one to the body."},
+{category:"SCIENCE",q:"Which metal is liquid at typical room temperature?",o:["Iron","Aluminium","Mercury","Copper"],a:"Mercury",why:"Mercury is liquid at typical room temperature."},
+{category:"TECHNOLOGY",q:"What does 'www' stand for in a website address?",o:["World Wide Web","Web World Window","Wide World Wire","World Web Work"],a:"World Wide Web",why:"WWW stands for World Wide Web."},
+{category:"EARTH",q:"Which is the largest ocean on Earth?",o:["Atlantic Ocean","Indian Ocean","Arctic Ocean","Pacific Ocean"],a:"Pacific Ocean",why:"The Pacific is Earth's largest and deepest ocean."}
+];
+let current=0,score=0,answered=false;
+const $=id=>document.getElementById(id);
+function render(){
+ const item=questions[current];$("category").textContent=item.category;$("question").textContent=item.q;
+ $("progress").textContent=`Question ${current+1} of ${questions.length}`;$("bar").style.width=`${(current+1)/questions.length*100}%`;
+ $("options").innerHTML="";
+ item.o.forEach((v,i)=>{const label=document.createElement("label");label.className="option";const radio=document.createElement("input");radio.type="radio";radio.name="answer";radio.value=v;radio.id=`option-${i}`;label.append(radio,document.createTextNode(v));$("options").append(label)});
+ $("feedback").textContent="";$("feedback").className="muted";$("submit").disabled=false;$("next").disabled=true;
+ $("next").textContent=current===questions.length-1?"See my result →":"Next question →";answered=false;
+}
+$("submit").addEventListener("click",()=>{
+ if(answered)return;const selected=document.querySelector('input[name="answer"]:checked');
+ if(!selected){$("feedback").textContent="Please select an answer before submitting.";$("feedback").className="bad";return}
+ const item=questions[current];if(selected.value===item.a){score++;$("feedback").textContent="Correct! "+item.why;$("feedback").className="good"}
+ else{$("feedback").textContent="Not quite. Correct answer: "+item.a+". "+item.why;$("feedback").className="bad"}
+ answered=true;$("submit").disabled=true;$("next").disabled=false;
+});
+$("next").addEventListener("click",()=>{
+ if(!answered)return;if(current<questions.length-1){current++;render()}else{$("quiz").hidden=true;$("result-panel").hidden=false;$("progress").textContent="Completed";$("bar").style.width="100%";$("result").textContent=`You scored ${score} out of ${questions.length}.`;$("result-title").textContent=score===5?"Perfect score!":score>=3?"Great work!":"Keep exploring!"}
+});
+$("restart").addEventListener("click",()=>{current=0;score=0;$("result-panel").hidden=true;$("quiz").hidden=false;render()});
+render();
+</script></body></html>
