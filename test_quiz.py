@@ -53,3 +53,21 @@ def test_quiz_application():
 if __name__ == "__main__":
     test_quiz_application()
 
+
+
+def test_wrong_answer_feedback():
+    driver = webdriver.Chrome()
+    try:
+        url = "http://127.0.0.1:8000"
+        driver.get(url)
+        count = len(driver.find_elements(By.NAME, "answer"))
+        texts = []
+        for i in range(count):
+            driver.get(url)
+            driver.find_elements(By.NAME, "answer")[i].click()
+            driver.find_element(By.ID, "submit").click()
+            texts.append(driver.find_element(By.ID, "feedback").text)
+        assert sum(t.startswith("Correct!") for t in texts) == 1
+        assert all(t != "" for t in texts)
+    finally:
+        driver.quit()
